@@ -59,6 +59,12 @@ bucle:			#lee 1 caracter
 				
 			#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
 				bnez $v0 bucle
+			
+			#cerramos el archivo y terminamos el programa
+				move $a0 $s0
+				li $v0 16
+				syscall
+				
 				b finPrograma
 				
 error:			#sacamos por pantalla el mensaje de error
@@ -83,6 +89,10 @@ bucleChar:		#leemos otro caracter
 				li $a2 1
 				li $v0 14
 				syscall
+				
+			#si ha llegado al final del archivo terminamos la funcion
+				beqz $v0 fin
+				
 				lb $t3 buffer							#$t3 caracter leido del archivo
 				
 			#si no es igual al primer caracter de la subcadena 
