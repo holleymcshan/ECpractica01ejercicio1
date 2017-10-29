@@ -11,14 +11,14 @@ main:			#abrimos el fichero
 				li $a1 0x0
 				li $v0 13
 				syscall
-				li $s0 -1
-				beq $v0 $s0 error
+				li $t0 -1
+				beq $v0 $t0 error
 				
 			#copiamos el descriptor del fichero						$s0 descriptor del archivo
 				move $s0 $v0
 				
-			#inicializamos el contador a 0							$t3 contador
-				li $t3 0
+			#inicializamos el contador a 0							$s1 contador
+				li $s1 0
 				
 bucle:			#lee 1 caracter
 				move $a0 $s0
@@ -55,7 +55,7 @@ bucle:			#lee 1 caracter
 				addi $sp $sp 8
 				
 			#sumamos al contador si hay subcadena
-				add $t3 $t3 $v1
+				add $s1 $s1 $v1
 				
 			#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
 				bnez $v0 bucle
@@ -104,7 +104,7 @@ bucleChar:		#leemos otro caracter
 else:			#si es el final de la subcadena sumamos 1 a v0(que es lo que devolvemos) y salimos del bucle 
 				lb $t5 cadena($t0)						#$t5 caracter actual de la subcadena
 				bnez $t5 noFinalSubcadena
-				li $v0 1
+				li $v1 1
 				b fin
 				
 noFinalSubcadena:	#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
