@@ -11,17 +11,17 @@ main:			#abrimos el fichero
 				li $a1 0x0
 				li $v0 13
 				syscall
-				li $t0 -1
-				beq $v0 $t0 error
+				li $s0 -1
+				beq $v0 $s0 error
 				
-			#copiamos el descriptor del fichero						$t0 descriptor del archivo
-				move $t0 $v0
+			#copiamos el descriptor del fichero						$s0 descriptor del archivo
+				move $s0 $v0
 				
 			#inicializamos el contador a 0							$t3 contador
 				li $t3 0
 				
 bucle:			#lee 1 caracter
-				move $a0 $t0
+				move $a0 $s0
 				la $a1 buffer
 				li $a2 1
 				li $v0 14
@@ -64,3 +64,32 @@ error:			#sacamos por pantalla el mensaje de error
 				la $a0 	mError
 				li $v0 4
 				syscall
+				
+haySubcadena:		#nuestra funcionø
+				li $t0 0							#$t0 contador
+				lw $t1 cadena($t0)						#$t1 caracter en contador
+				beq $a0 $t1 igual
+				
+			#leemos otro caracter
+bucleChar:			move $a0 $s0
+				la $a1 buffer
+				li $a2 1
+				li $v0 14
+				syscall
+			#si no es igual al primer caracter de la subcadena empezamos de nuevo
+				
+				bneq $a1 cadena($t0) else
+				addi $t0 $t0 4
+				
+				
+else:				li $t2 9
+				beq $t1 $t2 fin
+				li $t2 13
+				beq $t1 $t2 fin
+				li $t2 20
+				beq $t1 $t2 fin
+				
+				li $t0 0				#si no es el final, empezamos de nuevo en busca de la subcadena
+				b bucleChar
+igual:			
+fin:
