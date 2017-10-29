@@ -65,31 +65,61 @@ error:			#sacamos por pantalla el mensaje de error
 				li $v0 4
 				syscall
 				
-haySubcadena:		#nuestra funcionø
-				li $t0 0							#$t0 contador
-				lw $t1 cadena($t0)						#$t1 caracter en contador
-				beq $a0 $t1 igual
+haySubcadena:		#nuestra funcion
+			#iniciamos variables
+				li $t0 0							#$t0 contador de substring
+				li $v0 0							#$v0 valor de retorno
+			#cargamos el primer byte de la subcadena en $t4, si no es igual saltamos al else, si es igual sumamos uno al contador
+				lb $t4 cadena
+				bneq $a0 $t4 else
+				addi $t0 $t0 1
 				
-			#leemos otro caracter
-bucleChar:			move $a0 $s0
+			#inicializamos el valor de retorno a 0	
+bucleChar:		#leemos otro caracter
+				move $a0 $s0
 				la $a1 buffer
 				li $a2 1
 				li $v0 14
 				syscall
-			#si no es igual al primer caracter de la subcadena empezamos de nuevo
+				lb $t3 buffer							#$t3 caracter leido del archivo
 				
-				bneq $a1 cadena($t0) else
-				addi $t0 $t0 4
-				
-				
-else:				li $t2 9
-				beq $t1 $t2 fin
-				li $t2 13
-				beq $t1 $t2 fin
-				li $t2 20
-				beq $t1 $t2 fin
-				
-				li $t0 0				#si no es el final, empezamos de nuevo en busca de la subcadena
+			#si no es igual al primer caracter de la subcadena 
+				bneq $t3 cadena($t0) else
+				addi $t0 $t0 1
 				b bucleChar
-igual:			
-fin:
+				
+else:			#si es el final de la subcadena sumamos 1 a v0(que es lo que devolvemos) y salimos del bucle 
+				bnez cadena($t0) noFinalSubcadena
+				li $v0 1
+				b fin
+				
+noFinalSubcadena:	#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
+				li $t2 9
+				beq $t3 $t2 fin
+				li $t2 13
+				beq $t3 $t2 fin
+				li $t2 20
+				beq $t3 $t2 fin
+				
+			#si no es el final, empezamos de nuevo en busca de la subcadena	
+				li $t0 0				
+				b bucleChar	
+				
+irFinalPalabra:		#leer caracter hasta que sea espacio, tabulado o enter	
+				li $t2 9
+				beq $t3 $t2 fin
+				li $t2 13
+				beq $t3 $t2 fin
+				li $t2 20
+				beq $t3 $t2 fin
+				
+			#leemos otro caracter
+				move $a0 $s0
+				la $a1 buffer
+				li $a2 1
+				li $v0 14
+				syscall
+				lb $t3 buffer
+				
+				b irFinalPalabra
+fin:				jr $ra		
