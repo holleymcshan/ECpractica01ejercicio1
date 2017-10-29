@@ -59,11 +59,13 @@ bucle:			#lee 1 caracter
 				
 			#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
 				bnez $v0 bucle
+				b finPrograma
 				
 error:			#sacamos por pantalla el mensaje de error
 				la $a0 	mError
 				li $v0 4
 				syscall
+				b finPrograma
 				
 haySubcadena:		#nuestra funcion
 			#iniciamos variables
@@ -71,7 +73,7 @@ haySubcadena:		#nuestra funcion
 				li $v0 0							#$v0 valor de retorno
 			#cargamos el primer byte de la subcadena en $t4, si no es igual saltamos al else, si es igual sumamos uno al contador
 				lb $t4 cadena
-				bneq $a0 $t4 else
+				bne $a0 $t4 else
 				addi $t0 $t0 1
 				
 			#inicializamos el valor de retorno a 0	
@@ -84,12 +86,14 @@ bucleChar:		#leemos otro caracter
 				lb $t3 buffer							#$t3 caracter leido del archivo
 				
 			#si no es igual al primer caracter de la subcadena 
-				bneq $t3 cadena($t0) else
+				lb $t5 cadena($t0)						#$t5 caracter actual de la subcadena
+				bne $t3 $t5 else
 				addi $t0 $t0 1
 				b bucleChar
 				
 else:			#si es el final de la subcadena sumamos 1 a v0(que es lo que devolvemos) y salimos del bucle 
-				bnez cadena($t0) noFinalSubcadena
+				lb $t5 cadena($t0)						#$t5 caracter actual de la subcadena
+				bnez $t5 noFinalSubcadena
 				li $v0 1
 				b fin
 				
@@ -123,3 +127,5 @@ irFinalPalabra:		#leer caracter hasta que sea espacio, tabulado o enter
 				
 				b irFinalPalabra
 fin:				jr $ra		
+
+finPrograma:
