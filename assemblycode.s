@@ -1,147 +1,130 @@
 				.data
-nombre_fichero:	.asciiz "c:\users\fichero.txt "
+nombre_fichero:	.asciiz "/tmp/fichero.txt"
 cadena:		 	.asciiz "na"
 buffer:			.space 1
 mError:			.asciiz "Error al abrir"
-				.text
+error_vacio:		.asciiz "Fichero Vacio"
+
+			.text
 				.globl main
 				
-main:			#abrimos el fichero
-				la $a0 nombre_fichero
-				li $a1 0x0
-				li $v0 13
-				syscall
-				li $t0 -1
-				beq $v0 $t0 error
+main:			la $a0 nombre_fichero	#abrimos el fichero
+			li $a1 0x0
+			li $v0 13
+			syscall
+			li $t0 -1
+			beq $v0 $t0 error
 			
-			#copiamos el descriptor del fichero										$s0 descriptor del archivo
-				move $s0 $v0
+			move $s0 $v0	#copiamos el descriptor del fichero	#$s0 descriptor del archivo
+		
+			li $s1 0	#inicializamos el contador a 0		#$s1 contador
 				
-			#inicializamos el contador a 0											$s1 contador
-				li $s1 0
-				
-bucle:			#lee 1 caracter
-				move $a0 $s0
-				la $a1 buffer
-				li $a2 1
-				li $v0 14
-				syscall
+bucle:			move $a0 $s0	#lee 1 caracter
+			la $a1 buffer
+			li $a2 1
+			li $v0 14
+			syscall
 			
-			#si ha terminado el archivo terminamos el programa
-				beqz $v0 finPrograma
+			beqz $v0 vacio	#si ha terminado el archivo terminamos el programa
 				
-			#comprobamos si es un espacio, un tabulado, o un salto de linea			$t0 caracter en buffer
-				lb $t0 buffer
+			lb $t0 buffer	#comprobamos si es un espacio, un tabulado, o un salto de linea	 #$t0 caracter en buffer
 				
-				li $t1 0x9
-				beq $t1 $t0 bucle
-				li $t1 0x13
-				beq $t1 $t0 bucle
-				li $t1 0x20
-				beq $t1 $t0 bucle
+			li $t1 0x9
+			beq $t1 $t0 bucle
+			li $t1 0x13
+			beq $t1 $t0 bucle
+			li $t1 0x20
+			beq $t1 $t0 bucle
+
+			move $a0 $t0	#si no lo es seguimos, pasamos el caracter leido como parametro
 				
-			#si no lo es seguimos
-			#pasamos el caracter leido como parametro
-				move $a0 $t0
+			addi $sp $sp -8	#guardamos en la pila el $ra y el $fp
+			sw $ra 4($sp)
+			sw $fp ($sp)
 				
-			#guardamos en la pila el $ra y el $fp
-				addi $sp $sp -8
-				sw $ra 4($sp)
-				sw $fp ($sp)
+			jal haySubcadena	#llamamos a la funcion
 				
-			#llamamos a la funcion
-				jal haySubcadena
-				
-			#recuperamos el $fp y el $ra
-				lw $fp ($sp)
-				lw $ra 4($sp)
-				addi $sp $sp 8
+			lw $fp ($sp)	#recuperamos el $fp y el $ra
+			lw $ra 4($sp)
+			addi $sp $sp 8
 			
-			#sumamos al contador si hay subcadena
-				add $s1 $s1 $v1
+			add $s1 $s1 $v1	#sumamos al contador si hay subcadena
 				
-			#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
-				bnez $v0 bucle
+			bnez $v0 bucle	#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
 			
-			#cerramos el archivo y terminamos el programa
-				move $a0 $s0
-				li $v0 16
-				syscall					
-				b finPrograma
+			move $a0 $s0	#cerramos el archivo y terminamos el programa
+			li $v0 16
+			syscall					
+			b finPrograma
 				
-error:			#sacamos por pantalla el mensaje de error
-				la $a0 	mError
-				li $v0 4
-				syscall
-				b finPrograma
+error:			la $a0 	mError	#sacamos por pantalla el mensaje de error
+			li $v0 4
+			syscall
+			b finPrograma
 				
-haySubcadena:	
-			#nuestra funcion
-			#iniciamos variables
-				li $t0 0															#$t0 contador de substring
-				li $v1 0															#$v1 valor de retorno
-			#empezamos el bucle habiendo leido un caracter
-				move $t1 $a0
-				b despuesDeLeer
+haySubcadena:		li $t0 0	#nuestra funcion 	#iniciamos variables	#$t0 contador de substring
+			li $v1 0							#$v1 valor de retorno
+			move $t1 $a0	#empezamos el bucle habiendo leido un caracter
+			b despuesDeLeer
 				
-bucleChar:		#leemos un caracter
-				move $a0 $s0
-				la $a1 buffer
-				li $a2 1
-				li $v0 14
-				syscall
+bucleChar:		move $a0 $s0	#leemos un caracter
+			la $a1 buffer
+			li $a2 1
+			li $v0 14
+			syscall
 			
-			#si ha llegado al final del archivo terminamos la funcion
-				beqz $v0 fin
-			
-			#guardamos el carater leido												#$t1 caracter leido del archivo
-				lb $t1 buffer
+			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion
+			lb $t1 buffer	#guardamos el carater leido			#$t1 caracter leido del archivo
 				
-despuesDeLeer:	
-			#si no es igual al caracter actual de la subcadena saltamos a else
-			#si es igual al primer caracter de la subcadena sumamos 1 al contador de la subcadena y volvemos a empezar el bucle
-				lb $t2 cadena($t0)													#$t2 caracter actual de la subcadena
-				bne $t1 $t2 else	
-				addi $t0 $t0 1
-				b bucleChar
+despuesDeLeer:		lb $t2 cadena($t0)	#$t2 caracter actual de la subcadena
+			bne $t1 $t2 else	#si no es igual al caracter actual de la subcadena saltamos a else
+			addi $t0 $t0 1
+			b bucleChar
 				
-else:		#si es el final de la subcadena ponemos 1 en v1 (que es lo que devolvemos) y salimos del bucle
-			#si no, saltamos a noFinalSubcadena
-				bnez $t2 noFinalSubcadena
-				li $v1 1
-				b irFinalPalabra
+else:			bnez $t2 noFinalSubcadena	#si no, saltamos a noFinalSubcadena
+			li $v1 1
+			b irFinalPalabra	#si es el final de la subcadena ponemos 1 en v1 (que es lo que devolvemos) y salimos del bucle
 				
 
-noFinalSubcadena:
-			#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
-				li $t3 0x9
-				beq $t1 $t3 fin
-				li $t3 0x13
-				beq $t1 $t3 fin
-				li $t3 0x20
-				beq $t1 $t3 fin
+noFinalSubcadena:	li $t3 0x9	#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
+			beq $t1 $t3 fin
+			li $t3 0x13
+			beq $t1 $t3 fin
+			li $t3 0x20
+			beq $t1 $t3 fin
 				
-			#si no es el final, empezamos de nuevo en busca de la subcadena	
-				li $t0 0				
-				b bucleChar	
+			li $t0 0		#si no es el final, empezamos de nuevo en busca de la subcadena				
+			b bucleChar
+			li $v0 1
+			
+irFinalPalabra:		beq $v0 $0 fin	#leer caracter hasta que sea espacio, tabulado o enter	
+			li $t3 0x9
+			beq $t1 $t3 fin
+			li $t3 0x13
+			beq $t1 $t3 fin
+			li $t3 0x20
+			beq $t1 $t3 fin
 				
-irFinalPalabra:	#leer caracter hasta que sea espacio, tabulado o enter	
-				li $t3 0x9
-				beq $t1 $t3 fin
-				li $t3 0x13
-				beq $t1 $t3 fin
-				li $t3 0x20
-				beq $t1 $t3 fin
+			move $a0 $s0 	#leemos otro caracter
+			la $a1 buffer
+			li $a2 1
+			li $v0 14
+			syscall
+			lb $t1 buffer
 				
-			#leemos otro caracter
-				move $a0 $s0
-				la $a1 buffer
-				li $a2 1
-				li $v0 14
-				syscall
-				lb $t1 buffer
-				
-				b irFinalPalabra
-fin:				jr $ra		
+			b irFinalPalabra
 
-finPrograma:
+
+fin:			jr $ra		
+
+vacio:			li $v0 4
+			la $a0 error_vacio
+			syscall
+			li $v0 10
+			syscall
+
+finPrograma:	        li $v0 1
+			move $a0 $s1
+			syscall
+			li $v0 10
+			syscall
