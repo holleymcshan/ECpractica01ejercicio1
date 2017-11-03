@@ -27,7 +27,7 @@ bucle:			move $a0 $s0	#lee 1 caracter
 			
 			beqz $v0 vacio	#si ha terminado el archivo terminamos el programa
 				
-			lb $t0 buffer	#comprobamos si es un espacio, un tabulado, o un salto de linea	 #$t0 caracter en buffer
+			lb $t0 buffer	#comprobamos si es un espacio o un salto de linea	 #$t0 caracter en buffer
 				
 			li $t1 0x13
 			beq $t1 $t0 bucle
@@ -71,7 +71,6 @@ bucleChar:		move $a0 $s0	#leemos un caracter
 			li $v0 14
 			syscall
 			
-
 			lb $t1 buffer	#guardamos el caracter leido			#$t1 caracter leido del archivo
 				
 despuesDeLeer:		lb $t2 cadena($t0)						#$t2 caracter actual de la subcadena
@@ -83,7 +82,7 @@ despuesDeLeer:		lb $t2 cadena($t0)						#$t2 caracter actual de la subcadena
 	
 else:			bnez $t2 noFinalSubcadena	#si no, saltamos a noFinalSubcadena
 			li $v1 1
-			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion
+			beqz $v0 fin		#si ha llegado al final del archivo terminamos la funcion
 			b irFinalPalabra	#si es el final de la subcadena ponemos 1 en v1 (que es lo que devolvemos) y salimos del bucle
 				
 
@@ -93,17 +92,17 @@ noFinalSubcadena:	li $t3 0x13	#si el ultimo caracter leido es un espacio, un tab
 			beq $t1 $t3 fin
 			
 			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion	
-			li $t0 0		#si no es el final, empezamos de nuevo en busca de la subcadena				
+			li $t0 0	#si no es el final, empezamos de nuevo en busca de la subcadena				
 			b bucleChar
 			li $v0 1
 			
-irFinalPalabra:		beq $v0 $0 fin	#leer caracter hasta que sea espacio, tabulado o enter	
+irFinalPalabra:		beq $v0 $0 fin	#leer caracter hasta que sea espacio o enter	
 			li $t3 0x13
 			beq $t1 $t3 fin
 			li $t3 0x20
 			beq $t1 $t3 fin
 				
-			move $a0 $s0 	#leemos otro caracter
+			move $a0 $s0
 			la $a1 buffer
 			li $a2 1
 			li $v0 14
