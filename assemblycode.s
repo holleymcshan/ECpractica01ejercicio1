@@ -2,7 +2,7 @@
 nombre_fichero:	.asciiz "/Users/hmcshan/Desktop/tester.txt"
 cadena:		 	.asciiz "na"
 buffer:			.space 1
-mError:			.asciiz "Error al abrir"
+mError:			.asciiz "Error al abrir el fichero de entrada"
 error_vacio:		.asciiz "Fichero Vacio"
 
 			.text
@@ -58,7 +58,7 @@ bucle:			move $a0 $s0	#lee 1 caracter
 error:			la $a0 	mError	#sacamos por pantalla el mensaje de error
 			li $v0 4
 			syscall
-			b finPrograma
+			b getOut	#no queremos imprimir
 				
 haySubcadena:		li $t0 0	#nuestra funcion 	#iniciamos variables	#$t0 contador de substring
 			li $v1 0							#$v1 valor de retorno
@@ -120,9 +120,10 @@ vacio:			li $v0 4
 			syscall
 			li $v0 10
 			syscall
+			b getOut	#no queremos imprimir
 
 finPrograma:	        li $v0 1
 			move $a0 $s1
 			syscall
-			li $v0 10
+getOut:			li $v0 10
 			syscall
