@@ -71,21 +71,19 @@ bucleChar:		move $a0 $s0	#leemos un caracter
 			li $v0 14
 			syscall
 			
-			beqz $v0 else	#si ha llegado al final del archivo salatamos al else
+
 			lb $t1 buffer	#guardamos el caracter leido			#$t1 caracter leido del archivo
 				
 despuesDeLeer:		lb $t2 cadena($t0)						#$t2 caracter actual de la subcadena
 			bne $t1 $t2 else	#si no es igual al caracter actual de la subcadena saltamos a else
 			addi $t0 $t0 1
+			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion
 			b bucleChar
-				
+			
+	
 else:			bnez $t2 noFinalSubcadena	#si no, saltamos a noFinalSubcadena
 			li $v1 1
-			
 			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion
-			lb $t1 buffer	#guardamos el caracter leido			#$t1 caracter leido del archivo
-			
-			
 			b irFinalPalabra	#si es el final de la subcadena ponemos 1 en v1 (que es lo que devolvemos) y salimos del bucle
 				
 
@@ -93,7 +91,8 @@ noFinalSubcadena:	li $t3 0x13	#si el ultimo caracter leido es un espacio, un tab
 			beq $t1 $t3 fin
 			li $t3 0x20
 			beq $t1 $t3 fin
-				
+			
+			beqz $v0 fin	#si ha llegado al final del archivo terminamos la funcion	
 			li $t0 0		#si no es el final, empezamos de nuevo en busca de la subcadena				
 			b bucleChar
 			li $v0 1
