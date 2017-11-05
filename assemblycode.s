@@ -58,7 +58,8 @@ bucle:			move $a0 $s0	#lee 1 caracter
 error:			la $a0 	mError	#sacamos por pantalla el mensaje de error
 			li $v0 4
 			syscall
-			b getOut	#no queremos imprimir
+			li $v0 10	#no queremos imprimir
+			syscall
 				
 haySubcadena:		li $t0 0	#nuestra funcion 	#iniciamos variables	#$t0 contador de substring
 			li $v1 0							#$v1 valor de retorno
@@ -117,12 +118,11 @@ fin:			jr $ra
 vacio:			li $v0 4
 			la $a0 error_vacio
 			syscall
-			li $v0 10
+			li $v0 10		#no queremos imprimir
 			syscall
-			b getOut	#no queremos imprimir
 
 finPrograma:	        li $v0 1
 			move $a0 $s1
 			syscall
-getOut:			li $v0 10
+			li $v0 10
 			syscall
