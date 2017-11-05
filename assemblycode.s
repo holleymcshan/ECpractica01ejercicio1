@@ -12,8 +12,11 @@ main:			la $a0 nombre_fichero	#abrimos el fichero
 			li $a1 0x0
 			li $v0 13
 			syscall
+			
 			li $t0 -1
 			beq $v0 $t0 error
+			
+			beqz $v0 vacio		#si es el final del fichero esta vacio
 			
 			move $s0 $v0		#copiamos el descriptor del fichero		#$s0 descriptor del archivo
 		
@@ -25,7 +28,7 @@ bucle:			move $a0 $s0		#lee 1 caracter
 			li $v0 14
 			syscall
 			
-			beqz $v0 vacio		#si ha terminado el archivo terminamos el programa
+			beqz $v0 eof		#si ha llegado al final del archivo cerramos el archivo y terminamos
 				
 			lb $t0 buffer		#comprobamos si es un espacio o salto de linea	 #$t0 caracter en buffer
 				
@@ -50,7 +53,7 @@ bucle:			move $a0 $s0		#lee 1 caracter
 				
 			bnez $v0 bucle		#comprobamos si en el subprograma o en el descarte de espacios ha llegado al final
 			
-			move $a0 $s0		#cerramos el archivo y terminamos el programa
+eof:			move $a0 $s0		#cerramos el archivo y terminamos el programa
 			li $v0 16
 			syscall					
 			b finPrograma
