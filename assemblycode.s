@@ -16,11 +16,20 @@ main:			la $a0 nombre_fichero	#abrimos el fichero
 			li $t0 -1
 			beq $v0 $t0 error
 			
-			beqz $v0 vacio		#si es el final del fichero esta vacio
 			
 			move $s0 $v0		#copiamos el descriptor del fichero		#$s0 descriptor del archivo
-		
+			
 			li $s1 0		#inicializamos el contador a 0			#$s1 contador
+			
+			move $a0 $s0		#lee 1 caracter
+			la $a1 buffer
+			li $a2 1
+			li $v0 14
+			syscall
+			
+			beqz $v0 vacio		#si es el final, el fichero esta vacio
+			b comprobar		#si no esta vacio, iniciamoes el bucle despues de leer un caracter
+		
 				
 bucle:			move $a0 $s0		#lee 1 caracter
 			la $a1 buffer
@@ -30,7 +39,7 @@ bucle:			move $a0 $s0		#lee 1 caracter
 			
 			beqz $v0 eof		#si ha llegado al final del archivo cerramos el archivo y terminamos
 				
-			lb $t0 buffer		#comprobamos si es un espacio o salto de linea	 #$t0 caracter en buffer
+comprobar:		lb $t0 buffer		#comprobamos si es un espacio o salto de linea	 #$t0 caracter en buffer
 				
 			li $t1 0x13
 			beq $t1 $t0 bucle
