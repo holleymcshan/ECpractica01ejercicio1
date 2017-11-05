@@ -41,7 +41,7 @@ bucle:			move $a0 $s0		#lee 1 caracter
 				
 comprobar:		lb $t0 buffer		#comprobamos si es un espacio o salto de linea	 #$t0 caracter en buffer
 				
-			li $t1 0x13
+			li $t1 0xa
 			beq $t1 $t0 bucle
 			li $t1 0x20
 			beq $t1 $t0 bucle
@@ -99,7 +99,7 @@ else:			bnez $t2 noFinalSubcadena	#si no, saltamos a noFinalSubcadena
 			b irFinalPalabra	#si es el final de la subcadena ponemos 1 en v1 (que es lo que devolvemos) y salimos del bucle
 				
 
-noFinalSubcadena:	li $t3 0x13		#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
+noFinalSubcadena:	li $t3 0xa		#si el ultimo caracter leido es un espacio, un tabulado o un enter salimos de bucle
 			beq $t1 $t3 fin
 			li $t3 0x20
 			beq $t1 $t3 fin
@@ -110,7 +110,7 @@ noFinalSubcadena:	li $t3 0x13		#si el ultimo caracter leido es un espacio, un ta
 			li $v0 1
 			
 irFinalPalabra:		beq $v0 $0 fin		#leer caracter hasta que sea espacio o enter	
-			li $t3 0x13
+			li $t3 0xa
 			beq $t1 $t3 fin
 			li $t3 0x20
 			beq $t1 $t3 fin
